@@ -14,13 +14,10 @@ try {
   echo "Connection failed: " . $e->getMessage();
 }
 
-
-
 //preparar y cegar
 $sth = $conn->prepare("SELECT idTeatro,teatro,imagen FROM teatros");
 $sth->execute();
 $rs = $sth->fetchAll(PDO::FETCH_ASSOC);
- //var_dump($rs);
 ?>
 
 <!doctype html>
@@ -34,7 +31,6 @@ $rs = $sth->fetchAll(PDO::FETCH_ASSOC);
   <body>
     <div class="container text-center">
       <div class="row">
-       
         <?php if (!isset($_GET['idTeatro'])){ ?>
           <h1> Trassierra Tickes </h1>
           <table class="table table-striped">
@@ -49,7 +45,7 @@ $rs = $sth->fetchAll(PDO::FETCH_ASSOC);
                       <h2>".$value['teatro']."</h2>
                     </td>
                     <td>
-                      <a href='index.php?idTeatro=".$value['idTeatro']."&teatro=".$value['teatro']."'> 
+                      <a href='index.php?idTeatro=".$value['idTeatro']."'> 
                         <img src='img/".$value['imagen']."' class=' img-fluid rounded' style='width:500px;height:174px;'/>
                       </a>
                     </td>"; 
@@ -61,15 +57,17 @@ $rs = $sth->fetchAll(PDO::FETCH_ASSOC);
           <?php
         }else{
           $id_teatro=$_GET["idTeatro"];
-          $nombre_teatro=$_GET["teatro"];
           //preparar y cegar
           $sth = $conn->prepare("SELECT t.filas,t.columnas,t.teatro,s.fecha, s.hora,s.idSesion FROM `sesiones` as s
           LEFT JOIN `teatros` as t
           ON s.teatro=t.idTeatro Where s.teatro=$id_teatro");
           $sth->execute();
           $rs = $sth->fetchAll(PDO::FETCH_ASSOC);
+          if (count($rs)>0){
+            $nombre_teatro=$rs[0]['teatro'];
 
           ?>
+
           <h2> Sesiones <?php echo $nombre_teatro; ?> </h2>
            <table class="table table-striped">
           <thead>
@@ -88,7 +86,7 @@ $rs = $sth->fetchAll(PDO::FETCH_ASSOC);
               <td><?php echo $value['fecha']; ?> </td>
               <td><?php echo $value['hora']; ?> </td>
               <td><?php
-                    if ($totalButacasTeatro-count($rs1)==0){
+                    if (count($rs1)>=$totalButacasTeatro){
                       ?>
                       <img src="img/agotadas.jpeg">
                       <?php
@@ -104,18 +102,19 @@ $rs = $sth->fetchAll(PDO::FETCH_ASSOC);
               <?php }   ?>
             </tr> 
           </tbody>
-        </table>
-        
-         
-
-          
-
+        </table> 
+        <?php
+          }else{
+            echo "<h2>NO HAY SESIONES PARA EL TEATRO SELECCIONADO</h2>";
+          }
+          ?>
+                
+        <a href="index.php">Volver a seleccion de Teatro</a>
         <?php
         }
-        ?>
-        
-       
+        ?>      
       </div>
+    
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
   </body>
